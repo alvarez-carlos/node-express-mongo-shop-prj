@@ -1,7 +1,7 @@
 {
     "env":{
-        "MONGO_ATLAS_USER": "taskcarlos",
-        "MONGO_ATLAS_PW": "vKi759EkWU37QjUE",
-        "JWT_KETY": "secret"
+        "MONGO_ATLAS_USER": "user",
+        "MONGO_ATLAS_PW": "pw",
+        "JWT_KETY": "secret-key"
     }
 }
