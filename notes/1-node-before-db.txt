@@ -1,0 +1,475 @@
+1. Install Node
+2. npm init
+3. Install the Expressjs dependecy
+npm install --save express
+4. Create the file server.js
+this file will contain all the code to set up the nodejs server.
+In this case we do it through code and not like php with a software. In this
+case we create the server with JS when using nodejs.
+ 
+
+/********Server code
+const http = require('http')
+const app = require('./app')
+
+
+// we can get the port thorugh an env variable or just hard coded it.
+//On the server we are are going to deployy the apu, we can inject the env variable with the port. 
+// however if it is not configured the defalt port will be 3000
+const port = process.env.PORT || 3000;
+
+
+
+// create the server 
+// to create a server we need to pass a listener
+// the listener is a function which is executed whenever we received a request abd return a response to the client.
+const server = http.createServer(app);
+
+// start the server. this server is going to listen in the port 3000 since we have not configured an env var and the default por tis 3000
+server.listen(port)
+
+5. Create an app.js file
+
+const express = require('express')
+const app = express();
+
+// next is a function which we use to execute the next middleware.
+app.use((req, res, next) => {
+    res.status(200).json({
+        message: 'Hello World!'
+    })
+}) //this is a middleware
+
+
+module.exports = app
+
+6. Start the server
+node server.js
+
+7. Visite the link http://localhost:3000/ to see the result
+
+8. We can use postman to send different http request.
+9. we can also test the endpoints through the browser console.
+-----------
+fetch('http://localhost:3000/')
+.then(x => x.json())
+.then(x => console.log(x))
+-----------
+10. we can also use curl localhost:3000
+11. add products endpoints and test
+
+/*********************************products endpoint
+const express = require('express')
+
+const router = express.Router()
+
+
+router.get('/', (req, res, next) => {
+    res.status(200).json({
+        message: 'Hello from GEt!'
+    })
+})
+
+router.get('/:id', (req, res, next) => {
+    res.status(200).json({
+        message: 'Hello from get:id',
+        id: req.params.id
+    })
+})
+
+router.post('/', (req, res, next) => {
+    // res.status(200).send({ body: { ...req.body} })
+    
+    res.status(200).json({
+        message: 'Hello from post',
+        // body: req.body
+    })
+})
+
+router.put('/:id', (req, res, next) => {
+    res.status(200).json({
+        message:'Hello from Put',   
+        body: req.body,
+        id: req.params.id
+    })
+})
+
+router.patch('/:id', (req, res, next) => {
+    res.status(200).json({
+        message:'Hello from Patch',   
+        body: req.body,
+        id: req.params.id
+    })
+})
+
+router.delete('/:id', (req, res, next) => {
+    res.status(200).json({
+        message: 'Hello from Delete',
+        id: req.params.id
+    })
+})
+
+module.exports = router
+
+
+
+/*****************************app.js code update
+
+const express = require('express')
+const app = express();
+
+const products = require('./api/products')
+
+// next is a function which we use to execute the next middleware.
+// app.use((req, res, next) => {
+//     res.status(200).json({
+//         message: 'Hello World!'
+//     })
+// }) //this is a middleware
+
+app.use('/products', products)
+
+module.exports = app
+
+
+/********************************Test products endpoints
+
+-------------- get
+fetch('http://localhost:3000/products')
+.then(x => x.json())
+.then(x => console.log(x))
+
+--------------get:id
+fetch('http://localhost:3000/products/455')
+.then(x => x.json())
+.then(x => console.log(x))
+
+------------- post
+fetch('http://localhost:3000/productos',{
+method: 'POST', 
+headers: {'Content-Type': 'application/json'}, 
+body: JSON.stringify({message: 'New Message'})
+})
+.then(x => x.json())
+.then(x => console.log(x))
+
+------------put
+fetch('http://localhost:3000/productos/35',{
+method: 'PUT', 
+headers: {'Content-Type': 'application/json'}, 
+body: JSON.stringify({message: 'New Message'})
+})
+.then(x => x.json())
+.then(x => console.log(x))
+
+-----------patch
+fetch('http://localhost:3000/productos/35',{
+method: 'PATCH', 
+headers: {'Content-Type': 'application/json'}, 
+})
+.then(x => x.json())
+.then(x => console.log(x))
+
+------------delete
+fetch('http://localhost:3000/productos/35',{
+method: 'DELETE', 
+headers: {'Content-Type': 'application/json'}, 
+})
+.then(x => x.json())
+.then(x => console.log(x))
+
+
+
+/******************************DO THE SAME FOR THE ORDERS ENDPOINTS
+
+/*********************Orders code
+const express = require('express')
+
+const router = express.Router()
+
+
+router.get('/', (req, res, next) => {
+    res.status(200).json({
+        message: 'ORDERS - Hello from GEt!'
+    })
+})
+
+router.get('/:id', (req, res, next) => {
+    res.status(200).json({
+        message: 'ORDERS - Hello from get:id',
+        id: req.params.id
+    })
+})
+
+router.post('/', (req, res, next) => {
+    // res.status(200).send({ body: { ...req.body} })
+    
+    res.status(200).json({
+        message: 'ORDERS - Hello from post',
+        // body: req.body
+    })
+})
+
+router.put('/:id', (req, res, next) => {
+    res.status(200).json({
+        message:'ORDERS - Hello from Put',   
+        body: req.body,
+        id: req.params.id
+    })
+})
+
+router.patch('/:id', (req, res, next) => {
+    res.status(200).json({  
+        message:'ORDERS - Hello from Patch',   
+        body: req.body,
+        id: req.params.id
+    })
+})
+
+router.delete('/:id', (req, res, next) => {
+    res.status(200).json({
+        message: 'ORDERS - Hello from Delete',
+        id: req.params.id
+    })
+})
+
+module.exports = router
+
+/************************* update the app.js code
+
+const express = require('express')
+const app = express();
+
+const products = require('./api/products')
+const orders = require('./api/orders')
+
+app.use('/productos', products)
+app.use('/orders', orders)
+
+module.exports = app
+
+12. Improve the projects setup and handling errors
+---- Improve our workflow: improve the restart process of the server with a dependency: nodemon
+To improve the project setup we will install nodemon. this package will monitor
+the project's files and restart the server everytime a file changes.
+npm install --save-dev nodemon
+
+https://github.com/remy/nodemon
+
+-- To start the server with nodemon we need to make sure nodemon is a global is added in the project configuracion file package.json. otherwise, we'll get an error
+becase this package is not globally installed in our machine. For that we add the next line of code in the script object: "start": "nodemon server.js"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+
+here we can add it because node will look for the file in our project and not in our main system.
+--next, to start our server, we can run: npm start
+
+
+---------------- Handle Logs with morgan, the logan package for nodejs. Next we will add a login package to the setup. We will use it to log incoming request so that we can see some inforrmation in the terminal
+npm install --save morgan
+--- next udpate the app.js code to include morgan
+
+const express = require('express')
+const app = express();
+const morgan = require('morgan')
+
+const products = require('./api/products')
+const orders = require('./api/orders')
+
+
+app.use(morgan('dev')) //call morgan
+app.use('/productos', products)
+app.use('/orders', orders)
+
+module.exports = app
+
+
+
+----------------- Add Error Handling with middlewares at the end of the app.js module.
+
+---------Middlewares added to the app.js module.
+// handle error: handle every request that is not handled or supported by the rest of endpoints
+app.use((req, res, next) => {
+    const error = new Error('Not Found')
+    error.status = 404 //Not Found
+    next(error) //forward the request with the error obj to the next middleware below.
+})
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500)   //
+    res.json({
+        error:{
+            message: error.message
+        }
+    })
+})
+
+---------------------------app.js code updated.
+const express = require('express')
+const app = express();
+const morgan = require('morgan')
+
+const products = require('./api/products')
+const orders = require('./api/orders')
+
+
+app.use(morgan('dev')) //call morgan
+app.use('/productos', products)
+app.use('/orders', orders)
+
+
+
+// handle erros: handle every request that is not handled or supported by the rest of endpoints
+app.use((req, res, next) => {
+    const error = new Error('Not Found')
+    error.status = 404 //Not Found
+    next(error) //forward the request with the error obj to the next middleware below.
+})
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500)   //
+    res.json({
+        error:{
+            message: error.message
+        }
+    })
+})
+
+module.exports = app
+
+
+
+
+13. Extract the request body of incoming requests like post. and handle cors errors.
+--------------Parse the request's body with body-parser.  For that we will need to install body-parser. we need this package to parse the body of incoming request
+because it is not nicely formatted and easily readable by default in node. body-parser does not support files but it does suppor url enconded, body, json data.
+npm install --save body-parser
+
+-----app.js code udpate
+const express = require('express')
+const app = express();
+const morgan = require('morgan')
+const bodyParser = require('body-parser')
+
+const products = require('./api/products')
+const orders = require('./api/orders')
+
+
+app.use(morgan('dev')) //call morgan
+
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json()) //kind of padies
+
+app.use('/products', products)
+app.use('/orders', orders)
+
+
+// handle erros: handle every request that is not handled or supported by the rest of endpoints
+app.use((req, res, next) => {
+    const error = new Error('Not Found')
+    error.status = 404 //Not Found
+    next(error) //forward the request with the error obj to the next middleware below.
+})
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500)   //
+    res.json({
+        error:{
+            message: error.message
+        }
+    })
+})
+
+
+
+module.exports = app
+
+------ fetch code udpate
+
+fetch('http://localhost:3000/products',{headers:{'Content-Type': 'application/json'}, method: 'POST', body: JSON.stringify({
+    meal_id: '61910a307f9ce7a108f56780',
+    user: 'admin'
+})})
+.then(x => x.json())
+.then(x => console.log({ ...x }))
+
+
+---------------handling cors:  Cross-Origin-Resource-Sharing
+
+---- app.js udpated code
+
+const express = require('express')
+const app = express();
+const morgan = require('morgan')
+const bodyParser = require('body-parser')
+
+const products = require('./api/products')
+const orders = require('./api/orders')
+
+
+
+
+app.use(morgan('dev')) //call morgan
+
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json()) //kind of padies
+
+
+// CORS: Cross-Origin-Resource-Sharing
+// Let's append the headers to any response we send back. We should do it before the routes declaration. 
+app.use((req, res, next) => {
+    // Let's add some header to the response. This middleware will not send the reponse. it will just adjust it so that wherever I send it, it  has this headers.
+    //the cors error message says: No Access Control Allow at origin headers is present. Now we set it. So it will be present. 
+    /* The * gives access  to any origin.*/
+    res.header('Access-Control-Allow-Origin', '*') // instead of * we could use an especific url to restrict it like: https://www.my-page.com. But normally for API we want to receive requests to all our routes.  
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization') // we could use the *  to accept all of the headers.
+
+    // Check if the incoming request method property is a property is equal to 'OPTIONS'. Because browsers will always send an option request first when the client send a POST , PUT request. This is basically something that can NOT be avoided. Because this allows the browser to see if it can make the following request or if it is allowed to do that request to the API.
+    //Method is the property which allows us to access to the method used on the request sent by the cliennt.
+    if(req.method === 'OPTIONS'){
+        // If the option request is sent first. then we add an additional header where we tell the browser what it may send to the backend.
+        res.header('Access-Control-Methods', 'PUT, POST, PATCH, DELETE, GET')
+
+        //So if we receive such an options request we then will return a the following response.
+        return res.status(200).json({}) //pass an empty payload. we do not need to go to the routes because the options request is just to find out which options are allowed. And by sending back the reponse where we have added all this cors headers we do provide all this answer.
+    }
+    next()
+}) //this set up ensures that we prevent Cors Errors
+
+
+app.use('/products', products)
+app.use('/orders', orders)
+
+
+
+// handle erros: handle every request that is not handled or supported by the rest of endpoints
+app.use((req, res, next) => {
+    const error = new Error('Not Found')
+    error.status = 404 //Not Found
+    next(error) //forward the request with the error obj to the next middleware below.
+})
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500)   //
+    res.json({
+        error:{
+            message: error.message
+        }
+    })
+})
+
+
+module.exports = app
+
+
+14. Add the Database to our project. We will add MONGO as a DB and Mongoose as the package to interact with the data base.
+
+
+
+
+
+
+
+

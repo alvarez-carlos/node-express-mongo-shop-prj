@@ -1,0 +1,222 @@
+1. Users Model
+
+
+// https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression?page=2&tab=votes#tab-top
+// [a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?
+
+
+const mongoose = require('mongoose')
+
+
+// https://stackoverflow.com/questions/201323/how-can-i-validate-an-email-address-using-a-regular-expression?page=2&tab=votes#tab-top
+// [a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?
+
+const User = mongoose.Schema({
+    _id: mongoose.Schema.Types.ObjectId,
+    email: { type: String, required: true, unique: true, match:/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/ },
+    password: { type: String, required: true }
+})
+
+
+module.exports = mongoose.model('User', User)
+
+
+
+2. Install nodebcryptJS: this is a packer to TO ENCRYPT THE PASSWORD , TO HASH IT. 
+npm install bcrypt --save
+
+https://www.npmjs.com/package/bcrypt
+
+
+3. users.js routes: create, delete
+
+const express = require('express')
+const router = express.Router()
+const mongoose = require('mongoose')
+
+const User = require('../models/user')
+
+const bcrypt = require('bcrypt')
+
+
+
+// sign up
+router.post('/signup', (req, res, next) => {
+    const { email, password } = req.body
+    // console.log(email)
+    // console.log(password)
+
+    // User.find({ email })
+    User.findOne({ email })
+    .exec()
+    .then(result => {
+        // if (result.length >= 1) {
+        if (result) {
+            return res.status(422).json({
+                message: 'Mail exists'
+            })
+        } else{
+            bcrypt.hash(password, 10, (err, hash) => {
+                // console.log('step1')
+                if (err) {
+                    // console.log('step2')
+                    return res.status(500).json({
+                        error: err
+                    })
+                }
+                else{
+                    // console.log('step3')
+                    const user = new User({
+                        _id: new mongoose.Types.ObjectId(),
+                        email: email,
+                        password: hash
+                    })
+                    user.save()
+                    .then(result => {
+                        console.log(result)
+                        res.status(201).json({message: 'created'})
+                    })
+                    .catch(err => {
+                        console.log(err)
+                        res.status(500).json({error: err})
+                    })
+                }
+            })
+        }
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({error: err})
+    })
+
+
+    
+})
+
+// sign in
+// router.post('/signup', (res, res, next) => {
+// })
+
+
+
+
+
+// delete user
+router.delete('/:id', (req, res, next) => {
+    const { _id } = req.params.id
+    User.remove({ id })
+    .exec()
+    .then(result => {
+        res.status.length(200).json({
+            message: 'User deleted'
+        })
+    })
+    .catch(err => {
+        console.log(err)
+        res.status(500).json({
+            error: err
+        })
+    })
+})
+
+
+module.exports = router
+
+
+
+
+
+4. app.js update
+
+
+const express = require('express')
+const app = express();
+const morgan = require('morgan')
+const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
+
+
+const products = require('./api/routes/products')
+const orders = require('./api/routes/orders')
+const users = require('./api/routes/users')
+
+
+mongoose.connect('mongodb+srv://taskcarlos:vKi759EkWU37QjUE@cluster0.imo0m.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+{
+    
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+
+
+app.use(morgan('dev')) 
+
+app.use('/uploads', express.static('uploads'))
+
+app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.json()) 
+
+app.use((req, res, next) => {
+    
+    
+    /* The * gives access  to any origin.*/
+    res.header('Access-Control-Allow-Origin', '*') 
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization') 
+
+    if(req.method === 'OPTIONS'){
+        
+        res.header('Access-Control-Methods', 'PUT, POST, PATCH, DELETE, GET')
+
+        
+        return res.status(200).json({}) 
+    }
+    next()
+}) 
+
+
+app.use('/products', products)
+app.use('/orders', orders)
+app.use('/auth', users)
+
+app.use((req, res, next) => {
+    const error = new Error('Not Found')
+    error.status = 404 
+    next(error) 
+})
+
+app.use((error, req, res, next) => {
+    res.status(error.status || 500)   
+    res.json({
+        error:{
+            message: error.message
+        }
+    })
+})
+
+
+module.exports = app
+
+
+
+
+
+-------------------------------------Queries to create a user
+fetch('http://localhost:3000/auth/signup',{
+method: 'POST',
+headers:{
+'Content-Type': 'application/json'
+},
+body: JSON.stringify({
+email: 'root@gmail.com',
+password: '123456'
+})
+})
+.then(x => x.json())
+.then(x => console.log({ ...x }))
+
+
+
+---------------------------------------------- 
+
+
+
