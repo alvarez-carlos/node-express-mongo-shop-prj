@@ -10,7 +10,7 @@ const orders = require('./api/routes/orders')
 const users = require('./api/routes/users')
 
 
-mongoose.connect('mongodb+srv://taskcarlos:vKi759EkWU37QjUE@cluster0.imo0m.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
+mongoose.connect('mongodb+srv://user:pw@cluster0.imo0m.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
 {
     
     useNewUrlParser: true,
